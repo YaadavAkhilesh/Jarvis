@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { LogEntry, AppState, UserSettings } from './frontend/types';
+import { LogEntry, AppState, UserSettings } from './types';
 import { GoogleGenAI } from '@google/genai';
 import HUD from './frontend/components/HUD';
 import Sidebar from './frontend/components/Sidebar';
@@ -8,6 +8,7 @@ import VoiceIndicator from './frontend/components/VoiceIndicator';
 import FaceScanner from './frontend/components/FaceScanner';
 import GestureHUD from './frontend/components/GestureHUD';
 import SettingsModal from './frontend/components/SettingsModal';
+import TitleBar from './frontend/components/TitleBar';
 
 // Removed constant for API_KEY to use process.env.API_KEY directly in API calls as per guidelines.
 
@@ -157,15 +158,16 @@ const App: React.FC = () => {
           // Initializing GoogleGenAI with process.env.API_KEY directly inside the call to ensure freshness
           const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
           const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            config: { thinkingConfig: { thinkingBudget: 0 } },
+            model: 'gemini-1.5-flash',
             contents: `You are JARVIS from the Iron Man movies. You are serving Sir Akhil. 
             Personality: Sophisticated, polite, slightly dry British wit, extremely intelligent.
             Current Language: ${state.language}. 
             Input from Sir Akhil: "${command}". 
             Respond naturally and stay in character. Keep it brief.`,
           });
-          const reply = response.text || "Operational, sir.";
+          const reply = (response?.text && typeof response.text === 'string')
+            ? response.text
+            : (response?.candidates?.[0]?.content?.parts?.[0]?.text ?? 'Operational, sir.');
           speak(reply);
           addLog(`Jarvis: ${reply}`);
           setState(prev => ({ ...prev, isThinking: false }));
@@ -194,13 +196,15 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden text-cyan-400">
-      {state.isLocked && state.settings.enableFaceDetection && <FaceScanner onAuthenticated={handleUnlock} />}
-      
-      <Sidebar activePrinter={state.printer.activePrinter} onOpenSettings={() => setShowSettings(true)} />
-      
-      <main className="flex-1 flex flex-col relative" style={{ opacity: state.settings.hologramIntensity / 100 }}>
-        <header className="p-6 border-b border-cyan-900/50 flex justify-between items-center bg-slate-950/80 backdrop-blur-md">
+    <div className="flex flex-col h-screen w-screen overflow-hidden text-cyan-400 fixed inset-0 bg-slate-950">
+      <TitleBar />
+      <div className="flex flex-1 min-h-0">
+        {state.isLocked && state.settings.enableFaceDetection && <FaceScanner onAuthenticated={handleUnlock} />}
+
+        <Sidebar activePrinter={state.printer.activePrinter} onOpenSettings={() => setShowSettings(true)} />
+
+        <main className="flex-1 flex flex-col relative min-w-0" style={{ opacity: state.settings.hologramIntensity / 100 }}>
+          <header className="p-6 border-b border-cyan-900/50 flex justify-between items-center bg-slate-950/80 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-4">
             <div className={`h-3 w-3 rounded-full ${state.isLocked ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-cyan-500 animate-pulse shadow-[0_0_10px_#22d3ee]'}`} />
             <h1 className="text-2xl font-orbitron tracking-widest glow-cyan font-black uppercase">Jarvis v4.3 // AKHIL</h1>
@@ -244,7 +248,8 @@ const App: React.FC = () => {
             onClose={() => setShowSettings(false)} 
           />
         )}
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
