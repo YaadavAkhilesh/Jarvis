@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface SidebarProps {
   activePrinter: string;
   onOpenSettings: () => void;
+  mobileUrl?: string | null;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activePrinter, onOpenSettings }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activePrinter, onOpenSettings, mobileUrl }) => {
+  const [iotExpanded, setIotExpanded] = useState(false);
   return (
     <aside className="w-64 bg-slate-950/90 border-r border-cyan-900/50 flex flex-col p-6 z-20">
       <div className="mb-10 text-center">
@@ -21,7 +23,23 @@ const Sidebar: React.FC<SidebarProps> = ({ activePrinter, onOpenSettings }) => {
         <NavItem icon="fa-hand-point-up" label="Gesture Hub" />
         <NavItem icon="fa-microchip" label="Neural Ops" />
         <NavItem icon="fa-print" label="Printer Hub" />
-        <NavItem icon="fa-network-wired" label="IoT Mesh" />
+        <div onClick={() => setIotExpanded(prev => !prev)}>
+          <NavItem icon="fa-network-wired" label="IoT Mesh" active={iotExpanded} />
+        </div>
+        {iotExpanded && (
+          <div className="ml-4 pl-4 border-l border-cyan-900/50 space-y-2">
+            <div className="text-[10px] font-orbitron text-slate-500 uppercase tracking-wider">Mobile Control</div>
+            <p className="text-[11px] text-slate-400">Same WiFi → open on phone:</p>
+            {mobileUrl ? (
+              <a href={mobileUrl} target="_blank" rel="noopener noreferrer" className="block p-2 bg-slate-900 rounded border border-cyan-900/30 text-cyan-400 text-xs font-mono break-all hover:bg-slate-800">
+                {mobileUrl}
+              </a>
+            ) : (
+              <p className="text-amber-400/80 text-xs">Start bridge: python bridge.py</p>
+            )}
+            <p className="text-[10px] text-slate-500">Run commands, open apps, shutdown PC from phone.</p>
+          </div>
+        )}
         <div onClick={onOpenSettings}>
           <NavItem icon="fa-gear" label="Settings" />
         </div>

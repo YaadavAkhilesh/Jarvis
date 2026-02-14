@@ -13,6 +13,13 @@ export interface LogEntry {
   type: 'info' | 'warning' | 'error' | 'success';
 }
 
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
 export interface PrinterState {
   isOnline: boolean;
   activePrinter: string;
