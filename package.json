@@ -1,0 +1,22 @@
+{
+  "name": "jarvis-ai-akhil",
+  "private": true,
+  "version": "4.3.0",
+  "type": "module",
+  "scripts": {
+    "init": "node init.js",
+    "frontend": "vite --open",
+    "backend": "python bridge.py",
+    "dev": "node init.js && concurrently --kill-others \"npm run backend\" \"npm run frontend\""
+  },
+  "dependencies": {
+    "@google/genai": "^1.41.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "vite": "^6.0.3"
+  }
+}
